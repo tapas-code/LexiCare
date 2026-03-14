@@ -7,6 +7,7 @@ import { FluidGlassCard } from "@/components/ui/FluidGlassCard";
 import { NeonButton } from "@/components/ui/NeonButton";
 
 export default function Home() {
+  const [targetLanguage, setTargetLanguage] = useState("en");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -16,7 +17,7 @@ export default function Home() {
   const mockProfile = {
     allergies: ["Peanuts", "Penicillin"],
     medications: ["Lisinopril"],
-    targetLanguage: "es" // Soon to be dynamic!
+    targetLanguage: targetLanguage
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +66,10 @@ export default function Home() {
       <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-[10s] hover:scale-105" style={{ backgroundImage: "url('/imgs/bg.jpeg')" }} />
       <div className="absolute inset-0 z-0 bg-[#020205]/70 mix-blend-multiply" /> 
 
-      <TopNav />
+      <TopNav 
+        targetLanguage={targetLanguage} 
+        setTargetLanguage={setTargetLanguage} 
+      />
 
       <div className="relative z-10 w-full max-w-2xl flex flex-col items-center mt-8">
         <h1 className="text-5xl md:text-7xl font-light text-center mb-5  text-white drop-shadow-2xl">
