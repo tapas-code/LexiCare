@@ -41,7 +41,7 @@ export function HealthVaultModal({ isOpen, onClose, profile, setProfile }: Vault
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex justify-end">
+    <div className="fixed inset-0 z-100 flex justify-end ">
       {/* Blurred Backdrop */}
       <div 
         className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
@@ -51,9 +51,9 @@ export function HealthVaultModal({ isOpen, onClose, profile, setProfile }: Vault
       {/* Slide-in Panel */}
       <FluidGlassCard className="w-full max-w-md h-full rounded-none border-r-0 border-y-0 relative z-10 flex flex-col animate-in slide-in-from-right duration-500 shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
         
-        <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-6">
+        <div className="flex items-center justify-between mb-8 border-b border-white/10 p-6">
           <h2 className="text-2xl font-light tracking-wide flex items-center gap-3">
-            <Activity className="w-6 h-6 text-[var(--color-neon-cyan)]" /> 
+            <Activity className="w-4 h-4 text-[var(--color-neon-cyan)]" /> 
             Health Vault
           </h2>
           <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 transition-colors text-white/50 hover:text-white">
@@ -61,7 +61,7 @@ export function HealthVaultModal({ isOpen, onClose, profile, setProfile }: Vault
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-8 pr-2 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto space-y-8 px-6 custom-scrollbar">
           
           {/* Allergies Section */}
           <div className="space-y-4">
