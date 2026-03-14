@@ -15,9 +15,10 @@ const LANGUAGES = [
 interface TopNavProps {
   targetLanguage: string;
   setTargetLanguage: (lang: string) => void;
+  onOpenVault: () => void;
 }
 
-export function TopNav({ targetLanguage, setTargetLanguage }: TopNavProps) {
+export function TopNav({ targetLanguage, setTargetLanguage, onOpenVault }: TopNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const activeLang = LANGUAGES.find((l) => l.code === targetLanguage)?.name || "Language";
 
@@ -33,7 +34,7 @@ export function TopNav({ targetLanguage, setTargetLanguage }: TopNavProps) {
       <div className="flex items-center gap-4">
 
          {/* Health Vault */}
-         <NeonButton variant="pill">
+         <NeonButton variant="pill" onClick={onOpenVault}>
           <Activity className="w-3 h-3 text-[var(--color-neon-cyan)]" />
           Health Vault
         </NeonButton>

@@ -6,6 +6,7 @@ import { TopNav } from "@/components/TopNav";
 import { FluidGlassCard } from "@/components/ui/FluidGlassCard";
 import { NeonButton } from "@/components/ui/NeonButton";
 import { ResultsBentoGrid } from "@/components/ResultsBentoGrid";
+import { HealthVaultModal } from "@/components/HealthVaultModal";
 
 export default function Home() {
   const [targetLanguage, setTargetLanguage] = useState("en");
@@ -14,6 +15,12 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isVaultOpen, setIsVaultOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    allergies: ["Peanuts"], 
+    medications: ["Lisinopril"],
+  });
 
   const mockProfile = {
     allergies: ["Peanuts", "Penicillin"],
@@ -40,7 +47,7 @@ export default function Home() {
       const analyzeRes = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: preview, userProfile: mockProfile }),
+        body: JSON.stringify({ imageBase64: preview, userProfile: userProfile }),
       });
       const analyzeData = await analyzeRes.json();
       if (!analyzeData.success) throw new Error("Analysis failed");
@@ -48,7 +55,7 @@ export default function Home() {
       const lingoRes = await fetch("/api/lingo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ medicalData: analyzeData.data, targetLanguage: mockProfile.targetLanguage }),
+        body: JSON.stringify({ medicalData: analyzeData.data, targetLanguage }),
       });
       const lingoData = await lingoRes.json();
       if (!lingoData.success) throw new Error("Translation failed");
@@ -70,6 +77,7 @@ export default function Home() {
       <TopNav 
         targetLanguage={targetLanguage} 
         setTargetLanguage={setTargetLanguage} 
+        onOpenVault={() => setIsVaultOpen(true)} 
       />
 
       <div className="relative z-10 w-full max-w-2xl flex flex-col items-center mt-8">
@@ -133,6 +141,13 @@ export default function Home() {
           />
         )}
       </div>
+
+      <HealthVaultModal 
+        isOpen={isVaultOpen} 
+        onClose={() => setIsVaultOpen(false)}
+        profile={userProfile}
+        setProfile={setUserProfile}
+      />
     </main>
   );
 }
