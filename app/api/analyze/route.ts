@@ -16,13 +16,20 @@ export async function POST(req: Request) {
     // Strip the "data:image/jpeg;base64," prefix if it exists from the frontend
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
+    const profileForAI = {
+      allergies: userProfile?.allergies || [],
+      medications: userProfile?.medications || []
+    };
+
     const systemInstruction = `
       You are an expert medical AI. The user has uploaded an image of a medical prescription or over-the-counter medicine box.
       You must:
       1. Extract the active ingredients and dosage.
       2. Simplify the medical jargon into plain, easy-to-understand terms.
-      3. Cross-reference the ingredients with the user's health profile: ${JSON.stringify(userProfile || { allergies: [], medications: [] })}.
+      3. Cross-reference the ingredients with the user's health profile: ${JSON.stringify(profileForAI)}.
       4. Flag any high-risk allergy interactions or drug conflicts.
+
+      CRITICAL INSTRUCTION: You MUST generate your entire response in strictly ENGLISH. Do NOT translate the output into any other language.
     `;
 
     // Gemini allows us to strictly define the JSON schema it MUST return

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { LingoDotDevEngine } from "lingo.dev/sdk";
 
 export async function POST(req: Request) {
   try {
@@ -8,52 +9,49 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing data or target language" }, { status: 400 });
     }
 
-    // If the target is English, skip the API call to save latency
+    // Skip translation if the target is English
     if (targetLanguage === 'en') {
       return NextResponse.json({ success: true, translatedData: medicalData });
     }
 
-    // Prepare the payload for Lingo.dev
-    // We only translate the user-facing text, keeping the risk_level machine-readable
-    const textToTranslate = {
-      explanation: medicalData.simplified_explanation,
-      warnings: medicalData.allergy_warnings.join(" | "), // Join arrays for easier translation
-    };
-
-    // The Lingo.dev API Call
-    // Note: Adjust the endpoint/format slightly based on their exact hackathon SDK documentation
-    const lingoResponse = await fetch("https://api.lingo.dev/v1/translate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.LINGO_API_KEY}`,
-      },
-      body: JSON.stringify({
-        source_language: "en",
-        target_language: targetLanguage,
-        content: textToTranslate,
-        // THIS IS HOW YOU WIN: Passing context ensures medical terms aren't mistranslated
-        context: "This is a highly sensitive medical warning for a patient. Maintain an empathetic but urgent tone. Ensure drug names and medical conditions are accurately localized.",
-      }),
-    });
-
-    if (!lingoResponse.ok) {
-      throw new Error(`Lingo API Error: ${lingoResponse.statusText}`);
+    // Failsafe: Check if the API key is actually loading from .env.local
+    const apiKey = process.env.LINGO_API_KEY || process.env.LINGODOTDEV_API_KEY;
+    if (!apiKey) {
+      console.error("❌ MISSING LINGO API KEY IN .env.local");
+      throw new Error("API Key missing");
     }
 
-    const lingoData = await lingoResponse.json();
+    // Initialize SDK
+    const lingoDotDev = new LingoDotDevEngine({ apiKey });
 
-    // Reconstruct the JSON object with the localized strings
+    // Prepare the exact strings we want Lingo to translate
+    const contentToTranslate = {
+      explanation: medicalData.simplified_explanation,
+      warnings: medicalData.allergy_warnings?.join(" | ") || "No warnings", 
+    };
+
+    console.log("⏳ Sending ENGLISH text to Lingo.dev SDK...");
+
+    // The actual translation call
+    const translatedContent = await lingoDotDev.localizeObject(contentToTranslate, {
+      sourceLocale: "en",
+      targetLocale: targetLanguage,
+    });
+
+    console.log("✅ Lingo SDK Success!");
+
+    // Rebuild the final JSON payload for the frontend UI
     const translatedResult = {
       ...medicalData,
-      simplified_explanation: lingoData.translated_content.explanation,
-      allergy_warnings: lingoData.translated_content.warnings.split(" | "),
+      simplified_explanation: translatedContent.explanation || medicalData.simplified_explanation,
+      allergy_warnings: translatedContent.warnings ? translatedContent.warnings.split(" | ") : medicalData.allergy_warnings,
     };
 
     return NextResponse.json({ success: true, translatedData: translatedResult });
 
-  } catch (error) {
-    console.error("Lingo.dev Translation Error:", error);
-    return NextResponse.json({ error: "Failed to localize medical data" }, { status: 500 });
+  } catch (error: any) {
+    // This will print the EXACT reason it failed in your VS Code terminal
+    console.error("🔥 Lingo SDK Error Details:", error?.message || error);
+    return NextResponse.json({ error: "Failed to localize medical data", details: error?.message }, { status: 500 });
   }
 }
