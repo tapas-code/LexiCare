@@ -7,15 +7,15 @@ interface NeonButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
 
 export const NeonButton = ({ variant = "cyan", className, children, ...props }: NeonButtonProps) => {
   const variants = {
-    cyan: "border-[var(--color-neon-cyan)] text-[var(--color-neon-cyan)] hover:bg-[var(--color-neon-cyan)] hover:text-[var(--color-abyss)] hover:shadow-[0_0_20px_var(--color-neon-cyan)]",
-    magenta: "border-[var(--color-neon-magenta)] text-[var(--color-neon-magenta)] hover:bg-[var(--color-neon-magenta)] hover:text-[var(--color-abyss)] hover:shadow-[0_0_20px_var(--color-neon-magenta)]",
-    lime: "border-[var(--color-neon-lime)] text-[var(--color-neon-lime)] hover:bg-[var(--color-neon-lime)] hover:text-[var(--color-abyss)] hover:shadow-[0_0_20px_var(--color-neon-lime)]",
+    cyan: "border-[var(--color-neon-cyan)]/30 hover:border-[var(--color-neon-cyan)] hover:bg-[var(--color-neon-cyan)]/5 hover:text-[var(--color-neon-cyan)] hover:shadow-[0_0_20px_rgba(0,255,255,0.15)]",
+    magenta: "border-[var(--color-neon-magenta)]/30 hover:border-[var(--color-neon-magenta)] hover:bg-[var(--color-neon-magenta)]/5 hover:text-[var(--color-neon-magenta)] hover:shadow-[0_0_20px_rgba(255,0,255,0.15)]",
+    lime: "border-[var(--color-neon-lime)]/30 hover:border-[var(--color-neon-lime)] hover:bg-[var(--color-neon-lime)]/5 hover:text-[var(--color-neon-lime)] hover:shadow-[0_0_20px_rgba(57,255,20,0.15)]",
   };
 
   return (
     <button
       className={cn(
-        "relative px-8 py-3 font-bold rounded-xl border-2 transition-all duration-300 ease-in-out uppercase tracking-widest text-sm backdrop-blur-sm",
+        "relative px-6 py-2.5 rounded-full text-white/80 font-light text-sm tracking-wide border transition-all duration-500 ease-out backdrop-blur-md flex items-center justify-center gap-2",
         variants[variant],
         className
       )}
