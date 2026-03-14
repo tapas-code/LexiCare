@@ -5,6 +5,7 @@ import { Camera, Upload, ArrowRight, Loader2, AlertTriangle, CheckCircle2, Spark
 import { TopNav } from "@/components/TopNav";
 import { FluidGlassCard } from "@/components/ui/FluidGlassCard";
 import { NeonButton } from "@/components/ui/NeonButton";
+import { ResultsBentoGrid } from "@/components/ResultsBentoGrid";
 
 export default function Home() {
   const [targetLanguage, setTargetLanguage] = useState("en");
@@ -125,22 +126,11 @@ export default function Home() {
             </div>
           </FluidGlassCard>
         ) : (
-          /* Old Results View - We will replace this in Step 3! */
-          <FluidGlassCard className="w-full p-8 flex flex-col animate-in fade-in zoom-in duration-500">
-             <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
-              <h2 className="text-2xl font-light tracking-wide">Analysis Complete</h2>
-              <span className="text-[10px] font-medium tracking-widest uppercase text-white/60 border border-white/10 px-4 py-1.5 rounded-full flex items-center gap-2">
-                <Sparkles className="w-3 h-3 text-[var(--color-neon-cyan)]" /> Translated
-              </span>
-            </div>
-
-            {/* Content truncated for brevity, exact same logic as before */}
-            <p className="text-white mb-6 text-sm">{result.simplified_explanation}</p>
-            
-            <button onClick={() => { setResult(null); setPreview(null); setFile(null); }} className="w-full py-4 rounded-full border border-white/10 text-white/50 hover:text-[var(--color-neon-cyan)] hover:border-[var(--color-neon-cyan)]/50 hover:bg-[var(--color-neon-cyan)]/5 transition-all duration-300 text-xs font-medium tracking-widest uppercase mt-4">
-              Scan Another Document
-            </button>
-          </FluidGlassCard>
+          <ResultsBentoGrid 
+            result={result} 
+            onReset={() => { setResult(null); setPreview(null); setFile(null); }} 
+            targetLanguage={targetLanguage}
+          />
         )}
       </div>
     </main>

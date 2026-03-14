@@ -24,15 +24,14 @@ export async function POST(req: Request) {
     // Initialize SDK
     const lingoDotDev = new LingoDotDevEngine({ apiKey });
 
-    // Prepare the exact strings we want Lingo to translate
     const contentToTranslate = {
-      explanation: medicalData.simplified_explanation,
-      warnings: medicalData.allergy_warnings?.join(" | ") || "No warnings", 
+      summary: medicalData.overall_summary,
+      symptoms: medicalData.symptoms_treated?.join(" | ") || "None", 
+      risk: medicalData.risk_explanation,
     };
 
     console.log("⏳ Sending ENGLISH text to Lingo.dev SDK...");
 
-    // The actual translation call
     const translatedContent = await lingoDotDev.localizeObject(contentToTranslate, {
       sourceLocale: "en",
       targetLocale: targetLanguage,
@@ -40,11 +39,12 @@ export async function POST(req: Request) {
 
     console.log("✅ Lingo SDK Success!");
 
-    // Rebuild the final JSON payload for the frontend UI
+    // Rebuild the final JSON payload with translated strings
     const translatedResult = {
       ...medicalData,
-      simplified_explanation: translatedContent.explanation || medicalData.simplified_explanation,
-      allergy_warnings: translatedContent.warnings ? translatedContent.warnings.split(" | ") : medicalData.allergy_warnings,
+      overall_summary: translatedContent.summary || medicalData.overall_summary,
+      symptoms_treated: translatedContent.symptoms ? translatedContent.symptoms.split(" | ") : medicalData.symptoms_treated,
+      risk_explanation: translatedContent.risk || medicalData.risk_explanation,
     };
 
     return NextResponse.json({ success: true, translatedData: translatedResult });

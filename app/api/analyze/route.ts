@@ -36,12 +36,14 @@ export async function POST(req: Request) {
     const responseSchema: Schema = {
       type: Type.OBJECT,
       properties: {
-        ingredients: { type: Type.ARRAY, items: { type: Type.STRING } },
-        simplified_explanation: { type: Type.STRING },
-        allergy_warnings: { type: Type.ARRAY, items: { type: Type.STRING } },
+        overall_summary: { type: Type.STRING, description: "A simple 1-2 sentence summary of what this medicine is for." },
+        symptoms_treated: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of symptoms this treats (e.g., 'Fever', 'Cough')." },
+        medications: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of active ingredients/medications detected." },
+        detected_allergens: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of ingredients that conflict with the user's allergies." },
         risk_level: { type: Type.STRING, enum: ["safe", "warning", "danger"] },
+        risk_explanation: { type: Type.STRING, description: "Detailed explanation of why it is safe or why it is dangerous." }
       },
-      required: ["ingredients", "simplified_explanation", "allergy_warnings", "risk_level"],
+      required: ["overall_summary", "symptoms_treated", "medications", "detected_allergens", "risk_level", "risk_explanation"],
     };
 
     const response = await ai.models.generateContent({
