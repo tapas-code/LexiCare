@@ -138,6 +138,11 @@ export default function Home() {
             result={result} 
             onReset={() => { setResult(null); setPreview(null); setFile(null); }} 
             targetLanguage={targetLanguage}
+            userProfile={userProfile}
+            onAddMed={(med) => setUserProfile(prev => ({ 
+              ...prev, 
+              medications: [...new Set([...prev.medications, med])] // new Set prevents duplicates!
+            }))}
           />
         )}
       </div>

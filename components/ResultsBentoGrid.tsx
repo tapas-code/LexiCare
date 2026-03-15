@@ -1,13 +1,20 @@
-import { Sparkles, AlertTriangle, CheckCircle2, Pill, Activity, ShieldAlert } from "lucide-react";
+import { Sparkles, AlertTriangle, CheckCircle2, Pill, Activity, ShieldAlert, Plus, Check } from "lucide-react";
 import { FluidGlassCard } from "./ui/FluidGlassCard";
+
+interface Profile {
+  allergies: string[];
+  medications: string[];
+}
 
 interface ResultsProps {
   result: any;
   onReset: () => void;
   targetLanguage: string;
+  userProfile: Profile;
+  onAddMed: (med: string) => void;
 }
 
-export function ResultsBentoGrid({ result, onReset, targetLanguage }: ResultsProps) {
+export function ResultsBentoGrid({ result, onReset, targetLanguage, userProfile, onAddMed }: ResultsProps) {
   const isDanger = result.risk_level === "danger" || result.risk_level === "warning";
 
   return (
@@ -40,11 +47,29 @@ export function ResultsBentoGrid({ result, onReset, targetLanguage }: ResultsPro
               <Pill className="w-4 h-4 text-[var(--color-neon-lime)]" /> Detected Meds
             </h3>
             <div className="flex flex-wrap gap-2">
-              {result.medications?.map((med: string, i: number) => (
-                <span key={i} className="px-3 py-1 text-xs font-medium tracking-wide rounded-full border border-[var(--color-neon-lime)]/50 text-[var(--color-neon-lime)] bg-[var(--color-neon-lime)]/5">
-                  {med}
-                </span>
-              ))}
+              {result.medications?.map((med: string, i: number) => {
+                // Check if this med is already in the user's vault
+                const isAdded = userProfile.medications.some(
+                  (vaultMed) => vaultMed.toLowerCase() === med.toLowerCase()
+                );
+
+                return (
+                  <span key={i} className="group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium tracking-wide rounded-full border border-[var(--color-neon-lime)]/50 text-[var(--color-neon-lime)] bg-[var(--color-neon-lime)]/5 transition-all">
+                    {med}
+                    {!isAdded ? (
+                      <button 
+                        onClick={() => onAddMed(med)} 
+                        className="bg-[var(--color-neon-lime)]/20 p-0.5 rounded-full hover:bg-[var(--color-neon-lime)] hover:text-black transition-colors"
+                        title="Add to Health Vault"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    ) : (
+                      <Check className="w-3 h-3 opacity-50"  />
+                    )}
+                  </span>
+                );
+              })}
             </div>
           </div>
 
