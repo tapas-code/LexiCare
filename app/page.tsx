@@ -88,7 +88,7 @@ export default function Home() {
       
     } catch (error) {
       console.error(error);
-      alert("Something went wrong during analysis.");
+      alert("Something went wrong. Please check if you have enough credits before proceeding.");
     } finally {
       setIsAnalyzing(false);
     }
