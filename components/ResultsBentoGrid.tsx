@@ -87,18 +87,18 @@ export function ResultsBentoGrid({ result, onReset, targetLanguage, userProfile,
 
         {/* Box 3: Risk Assessment (Danger/Safe Box) */}
         <div className={`glass-inset p-5 rounded-3xl border relative overflow-hidden flex flex-col justify-center ${
-          isDanger ? "border-[var(--color-neon-magenta)]/30" : "border-[var(--color-neon-lime)]/30"
+          isDanger ? "border-[var(--color-neon-red)]/30" : "border-[var(--color-neon-lime)]/30"
         }`}>
-          <div className={`absolute inset-0 opacity-5 ${isDanger ? "bg-[var(--color-neon-magenta)]" : "bg-[var(--color-neon-lime)]"}`} />
+          <div className={`absolute inset-0 opacity-5 ${isDanger ? "bg-[var(--color-neon-red)]" : "bg-[var(--color-neon-lime)]"}`} />
           
           <div className="relative z-10 flex items-start gap-4 mb-4">
             {isDanger ? (
-              <AlertTriangle className="text-[var(--color-neon-magenta)] w-8 h-8 shrink-0" />
+              <AlertTriangle className="text-[var(--color-neon-red)] w-8 h-8 shrink-0" />
             ) : (
               <CheckCircle2 className="text-[var(--color-neon-lime)] w-8 h-8 shrink-0" />
             )}
             <div>
-              <h3 className={`font-medium text-sm tracking-wide uppercase mb-1 ${isDanger ? "text-[var(--color-neon-magenta)]" : "text-[var(--color-neon-lime)]"}`}>
+              <h3 className={`font-medium text-sm tracking-wide uppercase mb-1 ${isDanger ? "text-[var(--color-neon-red)]" : "text-[var(--color-neon-lime)]"}`}>
                 {isDanger ? "Interaction Warning" : "Safe to Consume"}
               </h3>
               <p className="text-white/80 text-sm font-light leading-relaxed">{result.risk_explanation}</p>
@@ -109,12 +109,27 @@ export function ResultsBentoGrid({ result, onReset, targetLanguage, userProfile,
           {result.detected_allergens?.length > 0 && (
             <div className="relative z-10 mt-auto pt-4 border-t border-white/10">
               <h3 className="text-[10px] font-semibold tracking-widest text-white/40 uppercase mb-2 flex items-center gap-2">
-                <ShieldAlert className="w-3 h-3 text-[var(--color-neon-magenta)]" /> Trigger Warnings
+                <ShieldAlert className="w-3 h-3 text-[var(--color-neon-red)]" /> Trigger Warnings
               </h3>
               <div className="flex flex-wrap gap-2">
                 {result.detected_allergens.map((allergen: string, i: number) => (
-                  <span key={i} className="px-3 py-1 text-xs font-medium tracking-wide rounded-full border border-[var(--color-neon-magenta)]/50 text-[var(--color-neon-magenta)] bg-[var(--color-neon-magenta)]/5">
+                  <span key={i} className="px-3 py-1 text-xs font-medium tracking-wide rounded-full border border-[var(--color-neon-red)]/50 text-[var(--color-neon-red)] bg-[var(--color-neon-red)]/5 animate-pulse">
                     {allergen}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {result.safer_alternatives?.length > 0 && (
+            <div className="relative z-10 mt-4 pt-4 border-t border-white/10">
+              <h3 className="text-[10px] font-semibold tracking-widest text-white/40 uppercase mb-2 flex items-center gap-2">
+                <Sparkles className="w-3 h-3 text-[var(--color-neon-cyan)]" /> Safer Alternatives
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {result.safer_alternatives.map((alt: string, i: number) => (
+                  <span key={i} className="px-3 py-1 text-xs font-medium tracking-wide rounded-full border border-[var(--color-neon-cyan)]/50 text-[var(--color-neon-cyan)] bg-[var(--color-neon-cyan)]/5">
+                    {alt}
                   </span>
                 ))}
               </div>

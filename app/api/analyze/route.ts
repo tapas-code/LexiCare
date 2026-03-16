@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       2. Simplify the medical jargon into plain, easy-to-understand terms.
       3. Cross-reference the ingredients with the user's health profile: ${JSON.stringify(profileForAI)}.
       4. Flag any high-risk allergy interactions or drug conflicts.
+      5. If the risk level is "warning" or "danger", suggest 1-3 safer alternative active ingredients that treat the same symptoms but do NOT conflict with the user's profile. If safe, return an empty array.
 
       CRITICAL INSTRUCTION: You MUST generate your entire response in strictly ENGLISH. Do NOT translate the output into any other language.
     `;
@@ -38,12 +39,13 @@ export async function POST(req: Request) {
       properties: {
         overall_summary: { type: Type.STRING, description: "A simple 1-2 sentence summary of what this medicine is for." },
         symptoms_treated: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of symptoms this treats (e.g., 'Fever', 'Cough')." },
-        medications: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of active ingredients/medications detected." },
+        medications: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of active ingredients/medications detected. Just the name of the ingredients/medications" },
         detected_allergens: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of ingredients that conflict with the user's allergies." },
         risk_level: { type: Type.STRING, enum: ["safe", "warning", "danger"] },
-        risk_explanation: { type: Type.STRING, description: "Detailed explanation of why it is safe or why it is dangerous." }
+        risk_explanation: { type: Type.STRING, description: "Detailed explanation of why it is safe or why it is dangerous." },
+        safer_alternatives: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of safer alternative medications if a risk is detected." }
       },
-      required: ["overall_summary", "symptoms_treated", "medications", "detected_allergens", "risk_level", "risk_explanation"],
+      required: ["overall_summary", "symptoms_treated", "medications", "detected_allergens", "risk_level", "risk_explanation", "safer_alternatives"],
     };
 
     const response = await ai.models.generateContent({

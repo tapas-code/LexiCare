@@ -27,7 +27,7 @@ export function TopNav({ targetLanguage, setTargetLanguage, onOpenVault }: TopNa
       {/* Brand Logo */}
       <div className="text-sm font-bold tracking-[0.3em] text-white flex items-center gap-3">
         <Sparkles className="text-[var(--color-neon-magenta)] w-4 h-4" />
-        LEXIMED
+        LEXICARE
       </div>
       
       {/* Right Actions */}

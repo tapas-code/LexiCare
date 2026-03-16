@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Camera, Upload, ArrowRight, Loader2, AlertTriangle, CheckCircle2, Sparkles } from "lucide-react";
 import { TopNav } from "@/components/TopNav";
 import { FluidGlassCard } from "@/components/ui/FluidGlassCard";
@@ -15,15 +15,42 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const [isTranslating, setIsTranslating] = useState(false); 
+  const [baseMedicalData, setBaseMedicalData] = useState<any>(null);
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({
-    allergies: ["Peanuts"], 
+    allergies: ["Caffeine"], 
     medications: ["Lisinopril"],
   });
 
+  const translateResults = async (dataToTranslate: any, lang: string) => {
+    setIsTranslating(true);
+    try {
+      const lingoRes = await fetch("/api/lingo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ medicalData: dataToTranslate, targetLanguage: lang }),
+      });
+      const lingoData = await lingoRes.json();
+      if (!lingoData.success) throw new Error("Translation failed");
+      
+      setResult(lingoData.translatedData);
+    } catch (error) {
+      console.error("Translation Error:", error);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // NEW: Watch for language changes and re-translate instantly
+  useEffect(() => {
+    if (baseMedicalData) {
+      translateResults(baseMedicalData, targetLanguage);
+    }
+  }, [targetLanguage]);
+
   const mockProfile = {
-    allergies: ["Peanuts", "Penicillin"],
+    allergies: ["Caffeine", "Penicillin"],
     medications: ["Lisinopril"],
     targetLanguage: targetLanguage
   };
@@ -44,23 +71,21 @@ export default function Home() {
     setResult(null);
 
     try {
+      // Step A: OCR and Medical Extraction (Gemini)
       const analyzeRes = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: preview, userProfile: userProfile }),
+        body: JSON.stringify({ imageBase64: preview, userProfile: userProfile }), 
       });
       const analyzeData = await analyzeRes.json();
       if (!analyzeData.success) throw new Error("Analysis failed");
 
-      const lingoRes = await fetch("/api/lingo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ medicalData: analyzeData.data, targetLanguage }),
-      });
-      const lingoData = await lingoRes.json();
-      if (!lingoData.success) throw new Error("Translation failed");
+      // Step B: Cache the English base data
+      setBaseMedicalData(analyzeData.data);
 
-      setResult(lingoData.translatedData);
+      // Step C: Trigger translation
+      await translateResults(analyzeData.data, targetLanguage);
+      
     } catch (error) {
       console.error(error);
       alert("Something went wrong during analysis.");
@@ -70,7 +95,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center p-6 selection:bg-[var(--color-neon-cyan)] selection:text-black">
+    <main className="min-h-screen relative overflow-hidden flex flex-col items-center justify-start p-6 pt-20 selection:bg-[var(--color-neon-cyan)] selection:text-black">
       <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-[10s] hover:scale-105" style={{ backgroundImage: "url('/imgs/bg.jpeg')" }} />
       <div className="absolute inset-0 z-0 bg-[#020205]/70 mix-blend-multiply" /> 
 
@@ -120,11 +145,16 @@ export default function Home() {
                 <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 text-xs font-medium tracking-wide text-white/50 hover:text-white transition-colors flex items-center gap-2 rounded-lg hover:bg-white/5">
                   <Upload className="w-4 h-4" /> {preview ? "Change File" : "Browse Files"}
                 </button>
+                
                 {preview && (
                   <button onClick={() => setPreview(null)} className="px-4 py-2 text-xs font-medium tracking-wide text-[var(--color-neon-magenta)]/70 hover:text-[var(--color-neon-magenta)] transition-colors flex items-center gap-2 rounded-lg hover:bg-white/5">
                     Clear
                   </button>
                 )}
+
+                <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 text-xs font-medium tracking-wide text-white/50 hover:text-white transition-colors flex items-center gap-2 rounded-lg hover:bg-white/5">
+                  <Camera className="w-4 h-4" /> Camera
+                </button>
               </div>
               
               <NeonButton variant="cyan" onClick={handleAnalyze} disabled={isAnalyzing || !preview}>
@@ -134,18 +164,38 @@ export default function Home() {
             </div>
           </FluidGlassCard>
         ) : (
-          <ResultsBentoGrid 
-            result={result} 
-            onReset={() => { setResult(null); setPreview(null); setFile(null); }} 
-            targetLanguage={targetLanguage}
-            userProfile={userProfile}
-            onAddMed={(med) => setUserProfile(prev => ({ 
-              ...prev, 
-              medications: [...new Set([...prev.medications, med])] // new Set prevents duplicates!
-            }))}
-          />
+          <div className={`w-full transition-opacity duration-300 ${isTranslating ? "opacity-40" : "opacity-100"}`}>
+            {isTranslating && <div className='text-center animate-pulse'>Translating...</div>}
+            <ResultsBentoGrid 
+              result={result} 
+              onReset={() => { 
+                setResult(null); 
+                setBaseMedicalData(null); 
+                setPreview(null); 
+                setFile(null); 
+              }} 
+              targetLanguage={targetLanguage}
+              userProfile={userProfile}
+              onAddMed={(med) => setUserProfile(prev => ({ 
+                ...prev, 
+                medications: [...new Set([...prev.medications, med])] 
+              }))}
+            />
+          </div>
         )}
       </div>
+
+      <div className="relative z-10 mt-auto py-10 flex items-center gap-6 ...">
+        <div className="mt-10 flex items-center gap-6 text-[10px] font-semibold text-white/40 tracking-wider uppercase">
+          <span className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-neon-lime)] animate-pulse-slow"></div> 
+            End-to-End Encrypted
+          </span>
+          <span>|</span>
+          <span>Powered by <span className='text-white ms-0.5'>Lingo.dev</span></span>
+        </div>
+      </div>
+     
 
       <HealthVaultModal 
         isOpen={isVaultOpen} 

@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       summary: medicalData.overall_summary,
       symptoms: medicalData.symptoms_treated?.join(" | ") || "None", 
       risk: medicalData.risk_explanation,
+      alternatives: medicalData.safer_alternatives?.length > 0 ? medicalData.safer_alternatives.join(" | ") : "None",
     };
 
     console.log("⏳ Sending ENGLISH text to Lingo.dev SDK...");
@@ -39,18 +40,21 @@ export async function POST(req: Request) {
 
     console.log("✅ Lingo SDK Success!");
 
-    // Rebuild the final JSON payload with translated strings
     const translatedResult = {
       ...medicalData,
       overall_summary: translatedContent.summary || medicalData.overall_summary,
-      symptoms_treated: translatedContent.symptoms ? translatedContent.symptoms.split(" | ") : medicalData.symptoms_treated,
       risk_explanation: translatedContent.risk || medicalData.risk_explanation,
+      symptoms_treated: translatedContent.symptoms && translatedContent.symptoms !== "None" 
+        ? translatedContent.symptoms.split(" | ") 
+        : medicalData.symptoms_treated,
+      safer_alternatives: translatedContent.alternatives && translatedContent.alternatives !== "None" 
+        ? translatedContent.alternatives.split(" | ") 
+        : medicalData.safer_alternatives,
     };
 
     return NextResponse.json({ success: true, translatedData: translatedResult });
 
   } catch (error: any) {
-    // This will print the EXACT reason it failed in your VS Code terminal
     console.error("🔥 Lingo SDK Error Details:", error?.message || error);
     return NextResponse.json({ error: "Failed to localize medical data", details: error?.message }, { status: 500 });
   }
