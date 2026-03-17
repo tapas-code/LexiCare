@@ -47,6 +47,8 @@ LexiCare learns about you. Scan a recent doctor's prescription, and the AI will 
 
 Scan an over-the-counter medicine box before you buy it. LexiCare instantly cross-references the detected ingredients against your personal Health Vault. If it detects a clash (e.g., an allergic reaction to Ibuprofen), it immediately flashes a critical warning.
 
+![LexiCare Health Vault](./public/imgs/health-vault.png)
+
 ### 🛡️ Safer Alternatives
 
 We don't just alert you to danger; we provide solutions. If an allergic conflict is detected, the AI generates safe, alternative active ingredients that treat the same symptoms without triggering your allergies.
